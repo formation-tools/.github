@@ -1,0 +1,3 @@
+#+title: GitHub Workflows (CI)
+
+In order to standardize our CI workloads, we try to define [[https://docs.github.com/en/actions/using-workflows/sharing-workflows-secrets-and-runners-with-your-organization][shared workflows]] as much as possible.
