@@ -1,3 +1,47 @@
 #+title: GitHub Workflows (CI)
 
 In order to standardize our CI workloads, we try to define [[https://docs.github.com/en/actions/using-workflows/sharing-workflows-secrets-and-runners-with-your-organization][shared workflows]] as much as possible.
+
+* Python
+
+** Runner Configuration
+
+Consult the [[https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners][About GitHub-hosted runners]] page for an overview of the the runner parameters that are configurable.
+
+** OS: Ubuntu
+
+*** Ubuntu version selection criteria :checklist:
+
+1. [ ] Refer to the Ubuntu [[https://wiki.ubuntu.com/Releases][Releases]] page to find the latest *LTS* (Long-Term Support) release.
+2. [ ] Update [[file:pythong-with-poetry.yml]] to use the highest *LTS* version supported by the target runtime environment. This should be constrained to the highest LTS version supported in the target PaaS solutions (like Render, Heroku, etc.) but should be flexible when we ship Docker containers, w also have to limit it to the [[https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources][supported runners available in GitHub Actions]].
+3. [ ] Update the [[*Changes][Changes]] section to reflect the update when the setup is stable
+
+** Runtime: Python
+
+An overview of stable https://devguide.python.org/versions/#versions
+https://www.python.org/downloads/
+
+*** Python version selection criteria :checklist:
+
+1. [ ] Refer to the [[https://devguide.python.org/versions/#versions][Status of Python version]] page to find the latest Python release in the *bugfix* status
+2. [ ] Update [[file:python-with-poetry.yml]] to use the highest *bugfix*-status release
+3. [ ] Update the [[*Changes][Changes]] section to reflect the update when the setup is stable
+
+** Package manager: Poetry
+
+https://python-poetry.org/docs/
+
+Note that [[https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages][poetry package caching]] can be utilized to reduce the startup time of a workflow as we can retrieve Poetry-managed dependencies from cache.
+
+*** Poetry version selection criteria :checklist:
+
+1. [ ] Refer to [[https://github.com/python-poetry/poetry][stable badge in the Poetry repo README]] to find the latest stable release of Poetry
+2. [ ] Update [[file:python-with-poetry.yml]] to use the highest *stable* version of Poetry
+3. [ ] Update the [[*Changes][Changes]] section to reflect the update when the setup is stable
+
+** Changes
+
+- [2023-03-17 Fri 11:37]
+  - Using *Ubuntu 22.04* which is the *highest LTS* release
+  - Using *Python 3.9*, latest *stable* version
+  - Using *Poetry 1.4.0*
