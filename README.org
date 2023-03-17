@@ -2,6 +2,56 @@
 
 In order to standardize our CI workloads, we try to define [[https://docs.github.com/en/actions/using-workflows/sharing-workflows-secrets-and-runners-with-your-organization][shared workflows]] as much as possible.
 
+* Usage
+
+** Refer to wanted workflow in target repository
+
+Use the .github/workflows directory in your repository to draft a yml file that outlines which shared workflow to utilize.
+
+The =jobs.<job_id>.uses= ([[https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_iduses][YAML spec on GitHub]]) field allows us to point to the workflow of choice by organization name, repository name and optionally a branch name, SHA or tag. Specifying all is definitely a best-practice as it makes the pipeline quite declarative and insulates it again unwanted changes (as in changes to mainline that may break a build). Let us be explicit about changing versions in all places to safeguard quality.
+
+The following snippet of a .yml file in the .github/workflows directory demonstrated how to use a shared workflow that is pinned by a SHA:
+
+#+begin_src yaml
+on: [push]
+
+jobs:
+  setup-basic-app:
+    uses: formation-tools/.github/.github/workflows/python-with-poetry.yml@06c564311a80274b30405e5c72cb555eb7bcc754
+#+end_src
+
+** Test Workflow
+
+⚠️ Testing the workflows is tricky to do reliably on a local development environment because the steps are executed on [[https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners][virtual machines on the GitHub-end]]. Tools like [[https://github.com/nektos/act][act]] enable some testing of the workflows from a development environment but due to the differences between the local environment and GitHub's workflow runners, one may not be able to reliably replicate issues between the environments.
+
+💡 The most reliable testing scenario is to push changes to the pipeline for execution in GitHub runners. One may have to use a feature branch that is force pushed to in order to rewrite history as necessary on just the development effort.
+
+In case you still decide to use act, you can run the following commands from the repository that is /calling/ the shared workflow.
+
+#+begin_src bash
+act
+#+end_src
+
+Optionally add the =-v= option to get more vebose logging output for debugging purposes.
+
+In case you need to test a workflow that has not yet been committed (or pushed because it is under development), you can copy the workflow of interest into the target repository's tree and update the workflow to refer to WIP workflow.
+
+#+begin_src yaml
+on: [push]
+
+jobs:
+  test:
+    #uses: formation-tools/.github/.github/workflows/python-with-poetry.yml@06c564311a80274b30405e5c72cb555eb7bcc754
+    uses: ./.github/workflows/WIP.yml
+    # NOTE that we copied the called worktree into the callers working directory
+#+end_src
+
+Note that symlinking or relative linked outside of the project tree may not work and yield errors such as:
+
+#+begin_src text
+'runs-on' key not defined in CALLING_WORKTREE_NAME/CALLED_WORKTREE_NAME
+#+end_src
+
 * Python
 
 ** Runner Configuration
