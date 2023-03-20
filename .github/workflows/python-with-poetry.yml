@@ -1,0 +1,54 @@
+---
+on:  # yamllint disable-line rule:truthy
+  workflow_call:
+    inputs:
+      ubuntu-version:
+        type: string
+        default: '22.04'
+      python-version:
+        type: string
+        default: '3.9'
+      poetry-version:
+        type: string
+        default: '1.4.0'
+
+jobs:
+  test:
+    runs-on: ubuntu-${{inputs.ubuntu-version}}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
+      - name: Install package manager (Poetry)
+        run: pipx install poetry==${{inputs.poetry-version}}
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '${{inputs.python-version}}'
+          cache: 'poetry'
+
+      - name: Install Python packages
+        run: poetry install
+
+      - name: Lint
+        run: poetry run ruff .
+
+      - name: Check formatting
+        run: poetry run black .
+
+      - name: Type check
+        run: poetry run pyright .
+
+      - name: Test
+        env:
+          SLACK_BOT_TOKEN: xoxb-a-big-nothing-burger
+        run: |
+          poetry run pytest --junitxml=junit/test-results.xml
+
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: pytest-results
+          path: junit/test-results.xml
+        if: ${{ always() }}
