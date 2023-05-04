@@ -12,8 +12,6 @@ on:  # yamllint disable-line rule:truthy
         type: string
         default: '1.4.0'
     secrets:
-      GITHUB_TOKEN:
-        required: true
       SONAR_TOKEN:
         required: true
 
