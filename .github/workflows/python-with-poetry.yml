@@ -18,11 +18,61 @@ on:  # yamllint disable-line rule:truthy
           see https://sonarcloud.io/account/security/
 
 jobs:
-  test:
-    runs-on: ubuntu-${{inputs.ubuntu-version}}
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+  install-dependencies:
+    runs-on: ubuntu-${{inputs.ubuntu-version}}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
+      - name: Install package manager (Poetry)
+        run: pipx install poetry==${{inputs.poetry-version}}
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '${{inputs.python-version}}'
+          cache: 'poetry'
+
+      - name: Install Python packages
+        run: poetry install
+
+  check-code:
+    runs-on: ubuntu-${{inputs.ubuntu-version}}
+
+    steps:
+      - name: Lint (with ruff)
+        run: poetry run ruff .
+
+      - name: Check formatting (with black)
+        run: poetry run black .
+
+      - name: Type check (with pyright)
+        run: poetry run pyright .
+
+  test-and-track-coverage:
+    runs-on: ubuntu-${{inputs.ubuntu-version}}
+
+    steps:
+      - name: Test (with pytest) and track coverage
+        run: |
+          poetry run pytest --junitxml=junit/test-results.xml --cov-report=xml
+
+  upload-coverage-report-to-sonarcloud:
+    runs
+    steps:
+      - name: Upload coverage results
+        # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
+        if: ${{ env.SONAR_TOKEN != '' }}
+        uses: SonarSource/sonarcloud-github-action@v1.9.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+
+  test:
     steps:
       - uses: actions/checkout@v3
 
