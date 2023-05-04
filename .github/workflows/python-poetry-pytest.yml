@@ -1,5 +1,5 @@
 ---
-name: Test (with Pytest)
+name: Test (with Pytest) and track coverage
 
 on:  # yamllint disable-line rule:truthy
   workflow_call:
@@ -14,6 +14,20 @@ jobs:
     runs-on: ubuntu-${{inputs.ubuntu-version}}
 
     steps:
-      - name: Test (with pytest) and track coverage
+      - name: Run pytest
         run: |
           poetry run pytest --junitxml=junit/test-results.xml --cov-report=xml
+
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: pytest-results
+          path: junit/test-results.xml
+        if: ${{ always() }}
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-reports
+          path: coverage.xml
+        if: ${{ always() }}
