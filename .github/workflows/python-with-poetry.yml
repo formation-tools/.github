@@ -16,12 +16,12 @@ on:  # yamllint disable-line rule:truthy
         required: false
         description: >
           see https://sonarcloud.io/account/security/
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 jobs:
   test:
     runs-on: ubuntu-${{inputs.ubuntu-version}}
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     steps:
       - uses: actions/checkout@v3
