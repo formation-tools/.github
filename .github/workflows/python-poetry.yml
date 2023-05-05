@@ -20,6 +20,8 @@ on:  # yamllint disable-line rule:truthy
 jobs:
 
   test:
+    runs-on: ubuntu-${{inputs.ubuntu-version}}
+
     steps:
       - uses: actions/checkout@v3
 
