@@ -10,7 +10,7 @@ on:  # yamllint disable-line rule:truthy
 
 jobs:
 
-  test-and-track-coverage:
+  store-test-and-coverage-report:
     runs-on: ubuntu-${{inputs.ubuntu-version}}
 
     steps:
