@@ -1,16 +1,6 @@
 ---
 on:  # yamllint disable-line rule:truthy
   workflow_call:
-    inputs:
-      ubuntu-version:
-        type: string
-        default: '22.04'
-      python-version:
-        type: string
-        default: '3.9'
-      poetry-version:
-        type: string
-        default: '1.4.0'
     secrets:
       SONAR_TOKEN:
         required: false
@@ -19,19 +9,20 @@ on:  # yamllint disable-line rule:truthy
 
 jobs:
 
-  check-and-test:
-    runs-on: ubuntu-${{inputs.ubuntu-version}}
+  test-python-poetry:
+
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v3
 
       # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
       - name: Install package manager (Poetry)
-        run: pipx install poetry==${{inputs.poetry-version}}
+        run: pipx install poetry==1.4.0
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '${{inputs.python-version}}'
+          python-version: 3.10.10
           cache: 'poetry'
 
       - name: Install Python packages
@@ -48,9 +39,10 @@ jobs:
 
       - name: Test
         env:
-          SLACK_BOT_TOKEN: xoxb-a-big-nothing-burger
         run: |
-          poetry run pytest --junitxml=junit/test-results.xml --cov-report=xml
+          poetry run pytest \
+            --junitxml=junit/test-results.xml \
+            --cov=. --cov-report=xml
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
@@ -59,6 +51,12 @@ jobs:
           path: junit/test-results.xml
         if: ${{ always() }}
 
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v1
+        with:
+          report_paths: 'junit/test-results.xml'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload coverage reports
         uses: actions/upload-artifact@v3
         with:
@@ -66,13 +64,20 @@ jobs:
           path: coverage.xml
         if: ${{ always() }}
 
-      - name: Upload coverage results
+      - name: Prep sonar-project.properties
+        run: |
+          echo "sonar.projectKey=$SONAR_PROJECT_KEY" \
+            >> sonar-project.properties
+          echo "sonar.organization=$SONAR_ORGANIZATION_KEY" \
+            >> sonar-project.properties
+          echo "sonar.python.coverage.reportPaths=coverage.xml" \
+            >> sonar-project.properties
+          cat sonar-project.properties
+
+      - name: Track coverage results
         # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
         if: ${{ env.SONAR_TOKEN != '' }}
         uses: SonarSource/sonarcloud-github-action@v1.9.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.python.coverage.reportPaths=coverage.xml
