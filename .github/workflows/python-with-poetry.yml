@@ -1,6 +1,11 @@
 ---
 on:  # yamllint disable-line rule:truthy
   workflow_call:
+    inputs:
+      sonar_properties:
+        description: Content of the sonar properties file
+        required: true
+        type: string
     secrets:
       SONAR_TOKEN:
         required: false
@@ -64,13 +69,9 @@ jobs:
           path: coverage.xml
         if: ${{ always() }}
 
-      - name: Prep sonar-project.properties
+      - name: Configure Sonar
         run: |
-          echo "sonar.projectKey=$SONAR_PROJECT_KEY" \
-            >> sonar-project.properties
-          echo "sonar.organization=$SONAR_ORGANIZATION_KEY" \
-            >> sonar-project.properties
-          echo "sonar.python.coverage.reportPaths=coverage.xml" \
+          echo ${{ inputs.sonar_properties }} \
             >> sonar-project.properties
           cat sonar-project.properties
 
