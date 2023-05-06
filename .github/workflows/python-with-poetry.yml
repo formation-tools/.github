@@ -1,11 +1,6 @@
 ---
 on:  # yamllint disable-line rule:truthy
   workflow_call:
-    inputs:
-      sonar_properties:
-        description: Content of the sonar properties file
-        required: true
-        type: string
     secrets:
       SONAR_TOKEN:
         required: false
@@ -69,11 +64,10 @@ jobs:
           path: coverage.xml
         if: ${{ always() }}
 
-      - name: Configure Sonar
-        run: |
-          echo ${{ inputs.sonar_properties }} \
-            >> sonar-project.properties
-          cat sonar-project.properties
+      - name: Download sonar-project.properties
+        uses: actions/download-artifact@v3
+        with:
+          name: sonar-properties
 
       - name: Track coverage results
         # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
