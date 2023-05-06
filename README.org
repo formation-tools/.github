@@ -52,6 +52,10 @@ Note that symlinking or relative linked outside of the project tree may not work
 'runs-on' key not defined in CALLING_WORKTREE_NAME/CALLED_WORKTREE_NAME
 #+end_src
 
+* Best Practices
+
+https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#reusing-third-party-workflows
+
 * Python
 
 ** Runner Configuration
@@ -89,7 +93,7 @@ Note that [[https://github.com/actions/setup-python/blob/main/docs/advanced-usag
 2. [ ] Update [[file:python-with-poetry.yml]] to use the highest *stable* version of Poetry
 3. [ ] Update the [[*Changes][Changes]] section to reflect the update when the setup is stable
 
-** Changes
+* Changes
 
 - [2023-03-17 Fri 11:37]
   - Using *Ubuntu 22.04* which is the *highest LTS* release
