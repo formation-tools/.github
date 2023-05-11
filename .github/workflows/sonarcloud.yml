@@ -19,6 +19,7 @@ on:  # yamllint disable-line rule:truthy
         required: true
       SONAR_ORGANIZATION_KEY:
         required: true
+        default: fortoo
 
 jobs:
   report_to_sonarcloud:
