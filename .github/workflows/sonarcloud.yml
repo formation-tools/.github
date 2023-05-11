@@ -5,11 +5,14 @@ on:  # yamllint disable-line rule:truthy
       test-report-artifact:
         required: true
         description: pytest-results when using python-with-poetry
+        type: string
       coverage-report-artifact:
         required: true
+        type: string
       coverage-report-path:
         required: true
         default: coverage.xml
+        type: string
     secrets:
       SONAR_TOKEN:
         required: true

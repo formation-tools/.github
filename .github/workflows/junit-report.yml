@@ -5,9 +5,11 @@ on:  # yamllint disable-line rule:truthy
       test-report-artifact:
         required: true
         description: pytest-results when using python-with-poetry
+        type: string
       test-report-directory:
         required: true
         default: junit/
+        type: string
 
 jobs:
   report_test_results:
