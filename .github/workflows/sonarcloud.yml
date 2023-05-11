@@ -20,9 +20,9 @@ on:  # yamllint disable-line rule:truthy
           see https://sonarcloud.io/account/security/
       SONAR_PROJECT_KEY:
         required: true
+      # TODO: Consider removing as this is always the same
       SONAR_ORGANIZATION_KEY:
         required: true
-        default: fortoo
 
 jobs:
   report_to_sonarcloud:
