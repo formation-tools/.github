@@ -1,0 +1,68 @@
+---
+on:  # yamllint disable-line rule:truthy
+  workflow_call:
+    inputs:
+      test-report-artifact:
+        required: true
+        description: pytest-results when using python-with-poetry
+      coverage-report-artifact:
+        required: true
+      coverage-report-path:
+        required: true
+        default: coverage.xml
+    secrets:
+      SONAR_TOKEN:
+        required: true
+        description: >
+          see https://sonarcloud.io/account/security/
+      SONAR_PROJECT_KEY:
+        required: true
+      SONAR_ORGANIZATION_KEY:
+        required: true
+
+jobs:
+  report_to_sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - id: properties
+        name: Setup sonar-project.properties
+        env:
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION_KEY: ${{ secrets.SONAR_ORGANIZATION_KEY }}
+        run: |
+          echo "sonar.projectKey=$SONAR_PROJECT_KEY" \
+            >> sonar-project.properties
+          echo "sonar.organization=$SONAR_ORGANIZATION_KEY" \
+            >> sonar-project.properties
+          echo "sonar.python.coverage.reportPaths=coverage.xml" \
+            >> sonar-project.properties
+          echo "sonar.python.version=3" \
+            >> sonar-project.properties
+          echo "sonar.sources=." \
+            >> sonar-project.properties
+          cat sonar-project.properties
+      - name: Download test results
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.test-report-artifact }}
+          path: junit/
+      - name: Download coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.coverage-report-artifact }}
+      - name: Modify paths in coverage report
+        run: |
+          sed -i \
+          "s#<source>[^<]*</source>#<source>/github/workspace</source>#g" ${{ inputs.coverage-report-path }} \
+          && head coverage.xml
+      - run: pwd && tree
+      - name: SonarCloud Scan
+        # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
+        uses: SonarSource/sonarcloud-github-action@v1.9.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

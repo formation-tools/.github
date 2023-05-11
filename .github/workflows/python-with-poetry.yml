@@ -1,78 +1,42 @@
 ---
 on:  # yamllint disable-line rule:truthy
   workflow_call:
-    secrets:
-      SONAR_TOKEN:
-        required: false
-        description: >
-          see https://sonarcloud.io/account/security/
 
 jobs:
-
   test-python-poetry:
-
+    name: Test
     runs-on: ubuntu-22.04
-
     steps:
       - uses: actions/checkout@v3
-
       # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
       - name: Install package manager (Poetry)
         run: pipx install poetry==1.4.0
-
       - uses: actions/setup-python@v4
         with:
           python-version: 3.10.10
           cache: 'poetry'
-
       - name: Install Python packages
         run: poetry install
-
       - name: Lint
         run: poetry run ruff .
-
       - name: Check formatting
         run: poetry run black .
-
       - name: Type check
         run: poetry run pyright .
-
       - name: Test
-        env:
         run: |
           poetry run pytest \
             --junitxml=junit/test-results.xml \
             --cov=. --cov-report=xml
-
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
         with:
           name: pytest-results
-          path: junit/test-results.xml
+          path: junit/
         if: ${{ always() }}
-
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v1
-        with:
-          report_paths: 'junit/test-results.xml'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Upload coverage reports
         uses: actions/upload-artifact@v3
         with:
           name: coverage-reports
           path: coverage.xml
         if: ${{ always() }}
-
-      - name: Download sonar-project.properties
-        uses: actions/download-artifact@v3
-        with:
-          name: sonar-properties
-
-      - name: Track coverage results
-        # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
-        if: ${{ env.SONAR_TOKEN != '' }}
-        uses: SonarSource/sonarcloud-github-action@v1.9.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
