@@ -64,7 +64,7 @@ jobs:
           "s#<source>[^<]*</source>#<source>/github/workspace</source>#g" ${{ inputs.coverage-report-path }} \
           && head coverage.xml
       - run: pwd && tree
-      - name: SonarCloud Scan
+      - name: Publish SonarCloud report
         # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
         uses: SonarSource/sonarcloud-github-action@v1.9.1
         env:
