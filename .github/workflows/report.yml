@@ -26,7 +26,7 @@ on:  # yamllint disable-line rule:truthy
 
 jobs:
   report_to_sonarcloud:
-    name: SonarCloud Scan
+    name: Report to SonarCloud
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -70,3 +70,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  report_to_codacy:
+    name: Report to Codacy
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download test results
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.test-report-artifact }}
+          path: junit/
+      - name: Download coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.coverage-report-artifact }}
+      - run: pwd && tree
+      - name: Publish SonarCloud report
+        # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
+      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
+        uses: SonarSource/sonarcloud-github-action@v1.9.1
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
