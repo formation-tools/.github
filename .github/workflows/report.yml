@@ -2,10 +2,20 @@
 on:  # yamllint disable-line rule:truthy
   workflow_call:
     inputs:
+      report-to-sonarcloud:
+        required: true
+        type: boolean
+        default: false
+      report-to-codacy:
+        required: true
+        type: boolean
+        default: false
+
       test-report-artifact:
         required: true
         description: pytest-results when using python-with-poetry
         type: string
+
       coverage-report-artifact:
         required: true
         type: string
@@ -13,21 +23,25 @@ on:  # yamllint disable-line rule:truthy
         required: false
         default: coverage.xml
         type: string
+
     secrets:
       SONAR_TOKEN:
-        required: true
+        required: ${{ inputs.report-to-sonarcloud }}
         description: >
           see https://sonarcloud.io/account/security/
       SONAR_PROJECT_KEY:
-        required: true
+        required: ${{ inputs.report-to-sonarcloud }}
       # TODO: Consider removing as this is always the same
       SONAR_ORGANIZATION_KEY:
-        required: true
+        required: ${{ inputs.report-to-sonarcloud }}
+      CODACY_PROJECT_TOKEN:
+        required: ${{ inputs.report-to-codacy }}
 
 jobs:
   report_to_sonarcloud:
     name: Report to SonarCloud
     runs-on: ubuntu-22.04
+    if: ${{ inputs.report-to-sonarcloud }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -74,6 +88,7 @@ jobs:
   report_to_codacy:
     name: Report to Codacy
     runs-on: ubuntu-22.04
+    if: ${{ inputs.report-to-codacy }}
     steps:
       - uses: actions/checkout@v3
         with:
