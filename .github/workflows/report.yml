@@ -58,7 +58,7 @@ jobs:
             >> sonar-project.properties
           echo "sonar.organization=$SONAR_ORGANIZATION_KEY" \
             >> sonar-project.properties
-          echo "sonar.python.coverage.reportPaths=coverage.xml" \
+          echo "sonar.python.coverage.reportPaths=${{ inputs.coverage-report-path }}" \
             >> sonar-project.properties
           echo "sonar.python.version=3" \
             >> sonar-project.properties
@@ -78,7 +78,7 @@ jobs:
         run: |
           sed -i \
           "s#<source>[^<]*</source>#<source>/github/workspace</source>#g" ${{ inputs.coverage-report-path }} \
-          && head coverage.xml
+          && head ${{ inputs.coverage-report-path }}
       - run: pwd && tree
       - name: Publish
         # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
@@ -105,8 +105,8 @@ jobs:
         with:
           name: ${{ inputs.coverage-report-artifact }}
       - run: pwd && tree
-      - name: Publish
+      - name: Publish with coverage
         # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
-        run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r ${{ inputs.coverage-report-path }}
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
