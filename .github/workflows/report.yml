@@ -38,6 +38,8 @@ on:  # yamllint disable-line rule:truthy
         required: ${{ inputs.report-to-codacy }}
 
 jobs:
+  # TODO: Eval merging the jobs such to retrieve code artifacts once and branch
+  # out publishing if the code and artifact retrieval take considerable time.
   report_to_sonarcloud:
     name: Report to SonarCloud
     runs-on: ubuntu-22.04
@@ -78,7 +80,7 @@ jobs:
           "s#<source>[^<]*</source>#<source>/github/workspace</source>#g" ${{ inputs.coverage-report-path }} \
           && head coverage.xml
       - run: pwd && tree
-      - name: Publish SonarCloud report
+      - name: Publish
         # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
         uses: SonarSource/sonarcloud-github-action@v1.9.1
         env:
@@ -103,9 +105,8 @@ jobs:
         with:
           name: ${{ inputs.coverage-report-artifact }}
       - run: pwd && tree
-      - name: Publish SonarCloud report
+      - name: Publish
         # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
       - run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
-        uses: SonarSource/sonarcloud-github-action@v1.9.1
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
