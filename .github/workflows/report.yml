@@ -107,6 +107,6 @@ jobs:
       - run: pwd && tree
       - name: Publish
         # https://docs.sonarcloud.io/enriching/test-coverage/python-test-coverage/
-      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
