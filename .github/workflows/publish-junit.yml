@@ -1,0 +1,30 @@
+---
+on:  # yamllint disable-line rule:truthy
+  workflow_call:
+    inputs:
+      test-report-artifact:
+        required: true
+        description: pytest-results when using python-with-poetry
+        type: string
+      test-report-directory:
+        required: true
+        default: junit/
+        type: string
+
+jobs:
+  report_test_results:
+    name: Publish test report
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download test results
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.test-report-artifact }}
+          path: ${{ inputs.test-report-directory }}
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v3
+        with:
+          commit: ${{github.event.workflow_run.head_sha}}
+          report_paths: '${{inputs.test-report-path}}*.xml'
+          detailed_summary: true
+          annotate_notice: true

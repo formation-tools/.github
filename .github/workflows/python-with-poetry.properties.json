@@ -1,0 +1,7 @@
+{
+  "name": "Python with Poetry Workflow",
+  "description": "Starter workflow for a Python app with Poetry-managed dependencies",
+  "filePatterns": [
+    "pyproject.toml"
+  ]
+}

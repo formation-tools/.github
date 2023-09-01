@@ -1,0 +1,78 @@
+---
+on:  # yamllint disable-line rule:truthy
+  workflow_call:
+    inputs:
+      style-check:
+        required: false
+        default: true
+        type: boolean
+        description: >
+          Use linter and static analysis tools to check (style) compatibility
+      type-check:
+        required: false
+        default: false
+        type: boolean
+      type-check-command:
+        required: false
+        type: string
+        description: >
+          Some possible options are:
+          - `poetry run pyright .`
+          - `poetry run pytype .`
+          - or whatever you opted for in your repo
+      test-command:
+        required: false
+        default: |
+          poetry run pytest \
+            --junitxml=junit/test-results.xml \
+            --cov=. --cov-report=xml
+        type: string
+        description: >
+          Command to run tests and produce resulting reports
+      pytest-report-path:
+        required: false
+        default: junit/
+        type: string
+      coverage-report-path:
+        required: false
+        default: coverage.xml
+        type: string
+
+jobs:
+  test-python-poetry:
+    name: Check & report
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
+      - name: Install package manager (Poetry)
+        run: pipx install poetry==1.4.0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.10.10
+          cache: 'poetry'
+      - name: Install Python packages
+        run: poetry install
+      - name: Lint
+        if: inputs.style-check
+        run: poetry run ruff .
+      - name: Check formatting
+        if: inputs.style-check
+        run: poetry run black .
+      - name: Type check
+        if: inputs.type-check
+        run: ${{ inputs.type-check-command }}
+      - name: Test
+        run: ${{ inputs.test-command }}
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: pytest-results
+          path: ${{ inputs.pytest-report-path }}
+        if: ${{ always() }}
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-reports
+          path: ${{ inputs.coverage-report-path }}
+        if: ${{ always() }}
