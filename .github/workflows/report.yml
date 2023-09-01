@@ -26,16 +26,16 @@ on:  # yamllint disable-line rule:truthy
 
     secrets:
       SONAR_TOKEN:
-        required: ${{ inputs.report-to-sonarcloud }}
+        required: false
         description: >
           see https://sonarcloud.io/account/security/
       SONAR_PROJECT_KEY:
-        required: ${{ inputs.report-to-sonarcloud }}
+        required: false
       # TODO: Consider removing as this is always the same
       SONAR_ORGANIZATION_KEY:
-        required: ${{ inputs.report-to-sonarcloud }}
+        required: false
       CODACY_PROJECT_TOKEN:
-        required: ${{ inputs.report-to-codacy }}
+        required: false
 
 jobs:
   # TODO: Eval merging the jobs such to retrieve code artifacts once and branch
